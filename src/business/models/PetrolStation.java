@@ -1,6 +1,5 @@
 package business.models;
 
-
 import java.util.List;
 
 public class PetrolStation {

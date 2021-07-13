@@ -89,6 +89,6 @@ public final class XMLParser {
 
     private static double getPrice(Element fuelElement){
         String priceString = fuelElement.getElementsByTagName("price").item(0).getTextContent();
-        return Double.parseDouble(priceString.charAt(0) == '$' ? priceString.substring(1) : priceString);
+        return Double.parseDouble(priceString.startsWith("$") ? priceString.substring(1) : priceString);
     }
 }
