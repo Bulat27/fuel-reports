@@ -1,31 +1,29 @@
-package Business.Models;
+package business.models;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 public class PetrolStation {
 
-    //I'm not sure if ArrayList is the best Collection the best option for Collection here.
-    //I don't know which operations will be used most frequently. I might change the implementation of the collection.
-    private ArrayList<Fuel> fuels;
+    private List<Fuel> fuels;
     private String name;
     private String address;
     private String city;
 
-    public PetrolStation() {
-    }
+    public PetrolStation() { }
 
-    public PetrolStation(ArrayList fuels, String name, String address, String city) {
+    public PetrolStation(List<Fuel> fuels, String name, String address, String city) {
         this.fuels = fuels;
         this.name = name;
         this.address = address;
         this.city = city;
     }
 
-    public ArrayList getFuels() {
+    public List<Fuel> getFuels() {
         return fuels;
     }
 
-    public void setFuels(ArrayList fuels) {
+    public void setFuels(List<Fuel> fuels) {
         this.fuels = fuels;
     }
 
@@ -62,9 +60,9 @@ public class PetrolStation {
     }
 
     private String printFuels(){
-        String s ="";
-        for (Fuel fuel: fuels) {
-           s+= fuel.toString() + "\n";
+        String s = "";
+        for (Fuel fuel: this.fuels) {
+           s += fuel.toString() + "\n";
         }
         return s;
     }

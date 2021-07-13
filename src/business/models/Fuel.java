@@ -1,12 +1,11 @@
-package Business.Models;
+package business.models;
 
 public class Fuel {
 
     private String type;
     private double price;
 
-    public Fuel() {
-    }
+    public Fuel() { }
 
     public Fuel(String type, double price) {
         this.type = type;
