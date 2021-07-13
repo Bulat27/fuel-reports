@@ -5,8 +5,6 @@ public class Fuel {
     private String type;
     private double price;
 
-    public Fuel() { }
-
     public Fuel(String type, double price) {
         this.type = type;
         this.price = price;

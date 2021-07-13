@@ -10,15 +10,6 @@ public class PetrolStation {
     private String address;
     private String city;
 
-    public PetrolStation() { }
-
-    public PetrolStation(List<Fuel> fuels, String name, String address, String city) {
-        this.fuels = fuels;
-        this.name = name;
-        this.address = address;
-        this.city = city;
-    }
-
     public List<Fuel> getFuels() {
         return fuels;
     }

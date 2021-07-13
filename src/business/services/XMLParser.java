@@ -13,17 +13,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class XMLParsingUtilities {
+public final class XMLParser {
 
-    //This is a Util class, so I've declared it as final and set its constructor to private in order to prevent
-    //inheritance and instantiation.
-    private XMLParsingUtilities() { }
+    private XMLParser() { }
 
     public static PetrolStations parsePetrolStationsXML(){
         List<PetrolStation> petrolStations = new ArrayList<>();
         LocalDate date = null;
-        PetrolStation petrolStation = null;
-
+        PetrolStation petrolStation;
         try {
             Document document = getDocument();
             NodeList nodeList = getNodeList(document);
@@ -70,7 +67,7 @@ public final class XMLParsingUtilities {
 
     private static Document getDocument() throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return builder.parse(new File("AdditionalFiles/PetrolStations.xml"));
+        return builder.parse(new File("resources/PetrolStations.xml"));
     }
 
     //Converts a list of nodes into a list of fuels and returns that list.
@@ -83,10 +80,15 @@ public final class XMLParsingUtilities {
             Node fuelNode = fuelNodes.item(i);
             if(fuelNode.getNodeType() == Node.ELEMENT_NODE){
                 Element fuelElement = (Element) fuelNode;
-                fuel = new Fuel(fuelElement.getAttribute("type"), Double.parseDouble(fuelElement.getElementsByTagName("price").item(0).getTextContent()));
+                fuel = new Fuel(fuelElement.getAttribute("type"), getPrice(fuelElement));
                 fuelList.add(fuel);
             }
         }
         return fuelList;
+    }
+
+    private static double getPrice(Element fuelElement){
+        String priceString = fuelElement.getElementsByTagName("price").item(0).getTextContent();
+        return Double.parseDouble(priceString.charAt(0) == '$' ? priceString.substring(1) : priceString);
     }
 }
