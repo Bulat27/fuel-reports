@@ -1,0 +1,46 @@
+<petrolStations date="2021-03-22">
+   <petrolStation name="Wintheiser Inc" address="590 Caliangt Drive" city="Le Port">
+      <fuels>
+         <fuel type="Petrol">
+            <price>1.75</price>
+         </fuel>
+         <fuel type="Premium Petrol">
+            <price>1.96</price>
+         </fuel>
+         <fuel type="Diesel">
+            <price>1.75</price>
+         </fuel>
+         <fuel type="Premium Diesel">
+            <price>1.95</price>
+         </fuel>
+         <fuel type="LPG">
+            <price>0.85</price>
+         </fuel>
+         <fuel type="CNG">
+            <price>1.00</price>
+         </fuel>
+      </fuels>
+   </petrolStation>
+   <petrolStation name="Conn Group" address="7 Carpenter Hill" city="Mérignac">
+      <fuels>
+         <fuel type="Petrol">
+            <price>1.79</price>
+         </fuel>
+         <fuel type="Premium Petrol">
+            <price>1.97</price>
+         </fuel>
+         <fuel type="Diesel">
+            <price>1.80</price>
+         </fuel>
+         <fuel type="Premium Diesel">
+            <price>1.96</price>
+         </fuel>
+         <fuel type="LPG">
+            <price>0.87</price>
+         </fuel>
+         <fuel type="CNG">
+            <price>1.03</price>
+         </fuel>
+      </fuels>
+   </petrolStation>
+</petrolStations>
