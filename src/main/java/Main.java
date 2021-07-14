@@ -1,7 +1,7 @@
-package main;
+package main.java;
 
-import business.models.PetrolStations;
-import business.services.XMLParser;
+import main.java.business.models.PetrolStations;
+import main.java.business.services.XMLParser;
 
 public class Main {
 

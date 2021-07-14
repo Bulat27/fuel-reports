@@ -1,4 +1,4 @@
-package business.services;
+package main.java.business.services;
 
 import com.jcraft.jsch.*;
 
@@ -9,7 +9,7 @@ public abstract class SFTPDownloader {
     private static final String REMOTE_HOST = "fe.ddns.protal.biz";
     private static final String USERNAME = "sftpuser";
     private static final String PASSWORD = "hyperpass";
-    private static final String SFTPWORKINGDIR = "/xml-data";
+    private static final String SFTPWORKINGDIR = "/xml-main.java.data";
     private static final String KNOWN_HOSTS = "C:/Users/Dragon/known_hosts";
     private static final String LOCAL_DIRECTORY = "resources/serverFiles";
     private static final int PORT = 22;

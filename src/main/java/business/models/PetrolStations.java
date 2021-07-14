@@ -1,4 +1,4 @@
-package business.models;
+package main.java.business.models;
 
 import java.time.LocalDate;
 import java.util.List;

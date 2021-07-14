@@ -1,8 +1,8 @@
-package business.services;
+package main.java.business.services;
 
-import business.models.Fuel;
-import business.models.PetrolStation;
-import business.models.PetrolStations;
+import main.java.business.models.Fuel;
+import main.java.business.models.PetrolStation;
+import main.java.business.models.PetrolStations;
 
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;

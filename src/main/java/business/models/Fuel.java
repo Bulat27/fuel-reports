@@ -1,4 +1,4 @@
-package business.models;
+package main.java.business.models;
 
 public class Fuel {
 
