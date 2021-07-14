@@ -61,3 +61,4 @@ logs/
 src/main/java/application/properties/local.properties
 # XLSX report files
 src/main/resources/*.xlsx
+resources/serverFiles
