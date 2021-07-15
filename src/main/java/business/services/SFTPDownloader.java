@@ -1,7 +1,8 @@
-package main.java.business.services;
+package business.services;
 
 import com.jcraft.jsch.*;
 
+import java.io.File;
 import java.util.Vector;
 
 public abstract class SFTPDownloader {
@@ -9,9 +10,9 @@ public abstract class SFTPDownloader {
     private static final String REMOTE_HOST = "fe.ddns.protal.biz";
     private static final String USERNAME = "sftpuser";
     private static final String PASSWORD = "hyperpass";
-    private static final String SFTPWORKINGDIR = "/xml-main.java.data";
+    private static final String SFTP_WORKING_DIR = "/xml-data";
     private static final String KNOWN_HOSTS = "C:/Users/Dragon/known_hosts";
-    private static final String LOCAL_DIRECTORY = "resources/serverFiles";
+    private static final String LOCAL_DIRECTORY = "src/main/resources/data";
     private static final int PORT = 22;
     private static final String PATH_SEPARATOR = "/";
 
@@ -27,13 +28,15 @@ public abstract class SFTPDownloader {
     }
 
     public static void downloadFiles(){
+        new File(LOCAL_DIRECTORY).mkdir();
+
         try {
             Session jschSession = setupJsch();
             ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
 
-            channelSftp.cd(SFTPWORKINGDIR);
-            downloadFromFolder(channelSftp, SFTPWORKINGDIR);
+            channelSftp.cd(SFTP_WORKING_DIR);
+            downloadFromFolder(channelSftp, SFTP_WORKING_DIR);
             channelSftp.exit();
             jschSession.disconnect();
         } catch (JSchException | SftpException e) {
@@ -52,9 +55,5 @@ public abstract class SFTPDownloader {
             System.out.println(en.getFilename());
             channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), LOCAL_DIRECTORY + PATH_SEPARATOR + en.getFilename());
         }
-    }
-
-    public static void main(String[] args) {
-        downloadFiles();
     }
 }

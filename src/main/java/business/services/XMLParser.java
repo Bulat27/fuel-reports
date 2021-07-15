@@ -1,8 +1,8 @@
-package main.java.business.services;
+package business.services;
 
-import main.java.business.models.Fuel;
-import main.java.business.models.PetrolStation;
-import main.java.business.models.PetrolStations;
+import business.models.Fuel;
+import business.models.PetrolStation;
+import business.models.PetrolStations;
 
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
@@ -17,12 +17,12 @@ public final class XMLParser {
 
     private XMLParser() { }
 
-    public static PetrolStations parsePetrolStationsXML(){
+    public static PetrolStations parsePetrolStationsXML(String docPath){
         List<PetrolStation> petrolStations = new ArrayList<>();
         LocalDate date = null;
         PetrolStation petrolStation;
         try {
-            Document document = getDocument();
+            Document document = getDocument(docPath);
             NodeList nodeList = getNodeList(document);
             date = getDate(document);
 
@@ -65,9 +65,9 @@ public final class XMLParser {
         return petrolStation;
     }
 
-    private static Document getDocument() throws ParserConfigurationException, SAXException, IOException {
+    private static Document getDocument(String docPath) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return builder.parse(new File("resources/PetrolStations.xml"));
+        return builder.parse(new File(docPath));
     }
 
     //Converts a list of nodes into a list of fuels and returns that list.
