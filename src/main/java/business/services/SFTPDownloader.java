@@ -1,20 +1,33 @@
 package business.services;
 
 import com.jcraft.jsch.*;
+import properties.PropertiesCache;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Vector;
 
 public abstract class SFTPDownloader {
 
-    private static final String REMOTE_HOST = "fe.ddns.protal.biz";
-    private static final String USERNAME = "sftpuser";
-    private static final String PASSWORD = "hyperpass";
-    private static final String SFTP_WORKING_DIR = "/xml-data";
-    private static final String KNOWN_HOSTS = "C:/Users/Dragon/known_hosts";
-    private static final String LOCAL_DIRECTORY = "src/main/resources/data";
-    private static final int PORT = 22;
-    private static final String PATH_SEPARATOR = "/";
+    private static final String REMOTE_HOST;
+    private static final String USERNAME;
+    private static final String PASSWORD;
+    private static final String SFTP_WORKING_DIR;
+    private static final String KNOWN_HOSTS;
+    public static final String LOCAL_DIRECTORY;
+    private static final int PORT;
+    private static final String PATH_SEPARATOR;
+
+    static{
+        REMOTE_HOST = PropertiesCache.getInstance().getProperty("remoteHost");
+        USERNAME = PropertiesCache.getInstance().getProperty("userName");
+        PASSWORD = PropertiesCache.getInstance().getProperty("password");
+        SFTP_WORKING_DIR = PropertiesCache.getInstance().getProperty("sftpWorkingDir");
+        KNOWN_HOSTS = PropertiesCache.getInstance().getProperty("knownHosts");
+        LOCAL_DIRECTORY = PropertiesCache.getInstance().getProperty("localDirectory");
+        PORT = Integer.parseInt(PropertiesCache.getInstance().getProperty("port"));
+        PATH_SEPARATOR = PropertiesCache.getInstance().getProperty("pathSeparator");
+    }
 
     private SFTPDownloader(){}
 
@@ -27,10 +40,8 @@ public abstract class SFTPDownloader {
         return jschSession;
     }
 
-    public static void downloadFiles(){
-        new File(LOCAL_DIRECTORY).mkdir();
-
-        try {
+    public static void downloadFiles() throws FileNotFoundException, JSchException, SftpException {
+            makeLocalDirectory();
             Session jschSession = setupJsch();
             ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
@@ -39,9 +50,13 @@ public abstract class SFTPDownloader {
             downloadFromFolder(channelSftp, SFTP_WORKING_DIR);
             channelSftp.exit();
             jschSession.disconnect();
-        } catch (JSchException | SftpException e) {
-            e.printStackTrace();
-        }
+    }
+
+    private static void makeLocalDirectory() throws FileNotFoundException {
+        if(new File(LOCAL_DIRECTORY).exists()) return;
+
+        boolean properlyMade = new File(LOCAL_DIRECTORY).mkdir();
+        if(!properlyMade) throw new FileNotFoundException();
     }
 
     private static void downloadFromFolder(ChannelSftp channelSftp, String folder) throws SftpException {
