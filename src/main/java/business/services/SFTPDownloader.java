@@ -17,16 +17,18 @@ public abstract class SFTPDownloader {
     public static final String LOCAL_DIRECTORY;
     private static final int PORT;
     private static final String PATH_SEPARATOR;
+    private static PropertiesCache properties;
 
     static{
-        REMOTE_HOST = PropertiesCache.getInstance().getProperty("remoteHost");
-        USERNAME = PropertiesCache.getInstance().getProperty("userName");
-        PASSWORD = PropertiesCache.getInstance().getProperty("password");
-        SFTP_WORKING_DIR = PropertiesCache.getInstance().getProperty("sftpWorkingDir");
-        KNOWN_HOSTS = PropertiesCache.getInstance().getProperty("knownHosts");
-        LOCAL_DIRECTORY = PropertiesCache.getInstance().getProperty("localDirectory");
-        PORT = Integer.parseInt(PropertiesCache.getInstance().getProperty("port"));
-        PATH_SEPARATOR = PropertiesCache.getInstance().getProperty("pathSeparator");
+        properties = PropertiesCache.getInstance();
+        REMOTE_HOST = properties.getProperty("remoteHost");
+        USERNAME = properties.getProperty("userName");
+        PASSWORD = properties.getProperty("password");
+        SFTP_WORKING_DIR = properties.getProperty("sftpWorkingDir");
+        KNOWN_HOSTS = properties.getProperty("knownHosts");
+        LOCAL_DIRECTORY = properties.getProperty("localDirectory");
+        PORT = Integer.parseInt(properties.getProperty("port"));
+        PATH_SEPARATOR = properties.getProperty("pathSeparator");
     }
 
     private SFTPDownloader(){}
