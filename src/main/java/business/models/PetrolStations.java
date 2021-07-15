@@ -28,4 +28,18 @@ public class PetrolStations {
     public void setDate(LocalDate date) {
         this.date = date;
     }
+
+    @Override
+    public String toString() {
+        return "Date: " + date + "\n" +
+                printPetrolStationList();
+    }
+
+    private String printPetrolStationList() {
+        String s = "";
+        for (PetrolStation p : this.petrolStationList) {
+            s += p.toString() + "\n";
+        }
+        return s;
+    }
 }

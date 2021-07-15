@@ -17,18 +17,18 @@ public final class XMLParser {
 
     private XMLParser() { }
 
-    public static PetrolStations parsePetrolStationsXML(){
+    public static PetrolStations parsePetrolStationsXML(String docPath) throws ParserConfigurationException, IOException, SAXException {
         List<PetrolStation> petrolStations = new ArrayList<>();
         LocalDate date = null;
         PetrolStation petrolStation;
-        try {
-            Document document = getDocument();
-            NodeList nodeList = getNodeList(document);
-            date = getDate(document);
 
-            //This part goes through the node list and sets PetrolStation instances to proper values based
-            //on the XML element.
-            for (int i = 0; i < nodeList.getLength(); i++) {
+        Document document = getDocument(docPath);
+        NodeList nodeList = getNodeList(document);
+        date = getDate(document);
+
+        //This part goes through the node list and sets PetrolStation instances to proper values based
+        //on the XML element.
+        for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
                 if(node.getNodeType() == Node.ELEMENT_NODE){
                     Element element = (Element) node;
@@ -40,9 +40,6 @@ public final class XMLParser {
                     petrolStations.add(petrolStation);
                 }
             }
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            e.printStackTrace();
-        }
         return new PetrolStations(petrolStations, date);
     }
 
@@ -65,9 +62,9 @@ public final class XMLParser {
         return petrolStation;
     }
 
-    private static Document getDocument() throws ParserConfigurationException, SAXException, IOException {
+    private static Document getDocument(String docPath) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return builder.parse(new File("resources/PetrolStations.xml"));
+        return builder.parse(new File(docPath));
     }
 
     //Converts a list of nodes into a list of fuels and returns that list.
