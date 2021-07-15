@@ -17,10 +17,9 @@ public abstract class SFTPDownloader {
     public static final String LOCAL_DIRECTORY;
     private static final int PORT;
     private static final String PATH_SEPARATOR;
-    private static PropertiesCache properties;
 
     static{
-        properties = PropertiesCache.getInstance();
+        PropertiesCache properties = PropertiesCache.getInstance();
         REMOTE_HOST = properties.getProperty("remoteHost");
         USERNAME = properties.getProperty("userName");
         PASSWORD = properties.getProperty("password");
