@@ -1,5 +1,6 @@
 package temporary;
 
+import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
 import business.services.XMLParser;

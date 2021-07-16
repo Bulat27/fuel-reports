@@ -21,8 +21,8 @@ public abstract class SFTPDownloader {
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
         REMOTE_HOST = properties.getProperty("remoteHost");
-        USERNAME = properties.getProperty("userName");
-        PASSWORD = properties.getProperty("password");
+        USERNAME = properties.getProperty("serverUserName");
+        PASSWORD = properties.getProperty("serverPassword");
         SFTP_WORKING_DIR = properties.getProperty("sftpWorkingDir");
         KNOWN_HOSTS = properties.getProperty("knownHosts");
         LOCAL_DIRECTORY = properties.getProperty("localDirectory");
