@@ -60,5 +60,5 @@ logs/
 # Local config
 src/main/java/application/properties/local.properties
 # XLSX report files
-src/main/resources/*.xlsx
-resources/data
+src/main/resources/data
+
