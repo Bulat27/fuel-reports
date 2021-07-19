@@ -1,5 +1,6 @@
 package business.models;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class PetrolStation {
@@ -8,6 +9,7 @@ public class PetrolStation {
     private String name;
     private String address;
     private String city;
+    private LocalDate date;
 
     public List<Fuel> getFuels() {
         return fuels;
@@ -41,11 +43,20 @@ public class PetrolStation {
         this.city = city;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
         return "name: " + name  +
                 " address: " + address +
-                " city:" + city + "\n" +
+                " city: " + city + "\n" +
+                "date: " + date + "\n" +
                 printFuels();
     }
 

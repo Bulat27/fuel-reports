@@ -2,8 +2,8 @@ package business.services;
 
 import business.models.Fuel;
 import business.models.PetrolStation;
-import business.models.PetrolStations;
 
+import business.models.PetrolStations;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -19,7 +19,7 @@ public final class XMLParser {
 
     public static PetrolStations parsePetrolStationsXML(String docPath) throws ParserConfigurationException, IOException, SAXException {
         List<PetrolStation> petrolStations = new ArrayList<>();
-        LocalDate date = null;
+        LocalDate date;
         PetrolStation petrolStation;
 
         Document document = getDocument(docPath);
@@ -32,7 +32,7 @@ public final class XMLParser {
                 Node node = nodeList.item(i);
                 if(node.getNodeType() == Node.ELEMENT_NODE){
                     Element element = (Element) node;
-                    petrolStation = getPopulatedPetrolStation(element);
+                    petrolStation = getPopulatedPetrolStation(element, date);
 
                     //Fuels attribute needs more complicated logic since it is a List, not a single element.
                     NodeList fuelNodeList = element.getElementsByTagName("fuel");
@@ -40,7 +40,7 @@ public final class XMLParser {
                     petrolStations.add(petrolStation);
                 }
             }
-        return new PetrolStations(petrolStations, date);
+        return new PetrolStations(petrolStations);
     }
 
     private static NodeList getNodeList(Document document) {
@@ -54,11 +54,12 @@ public final class XMLParser {
     }
 
     //Returns a petrol station with simple elements populated
-    private static PetrolStation getPopulatedPetrolStation(Element element) {
+    private static PetrolStation getPopulatedPetrolStation(Element element, LocalDate date) {
         PetrolStation petrolStation = new PetrolStation();
         petrolStation.setName(element.getAttribute("name"));
         petrolStation.setAddress(element.getAttribute("address"));
         petrolStation.setCity(element.getAttribute("city"));
+        petrolStation.setDate(date);
         return petrolStation;
     }
 
@@ -72,7 +73,7 @@ public final class XMLParser {
         if(fuelNodes==null) return new ArrayList<>();
 
         List<Fuel> fuelList= new ArrayList<>();
-        Fuel fuel = null;
+        Fuel fuel;
         for (int i = 0; i < fuelNodes.getLength(); i++) {
             Node fuelNode = fuelNodes.item(i);
             if(fuelNode.getNodeType() == Node.ELEMENT_NODE){

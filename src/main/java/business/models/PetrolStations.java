@@ -1,16 +1,13 @@
 package business.models;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class PetrolStations {
 
     private List<PetrolStation> petrolStationList;
-    private LocalDate date;
 
-    public PetrolStations(List<PetrolStation> petrolStationList, LocalDate date) {
+    public PetrolStations(List<PetrolStation> petrolStationList) {
         this.petrolStationList = petrolStationList;
-        this.date = date;
     }
 
     public List<PetrolStation> getPetrolStationList() {
@@ -21,18 +18,9 @@ public class PetrolStations {
         this.petrolStationList = petrolStationList;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     @Override
     public String toString() {
-        return "Date: " + date + "\n" +
-                printPetrolStationList();
+        return printPetrolStationList();
     }
 
     private String printPetrolStationList() {
