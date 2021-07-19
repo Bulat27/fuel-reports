@@ -18,6 +18,8 @@ public final class Repositories {
     private static final String FUELS_TABLE_NAME;
     private static final String PETROL_STATIONS_TABLE_NAME;
     private static final String PRICE_LIST_TABLE_NAME;
+    private static final String DISTINCTION_COLUMN_FUELS;
+    private static final String DISTINCTION_COLUMN_PS;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -28,6 +30,8 @@ public final class Repositories {
         FUELS_TABLE_NAME = "FUELS";
         PETROL_STATIONS_TABLE_NAME = "PETROL_STATIONS";
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
+        DISTINCTION_COLUMN_FUELS = "name";
+        DISTINCTION_COLUMN_PS = "name";
     }
 
     private Repositories(){}
@@ -35,7 +39,7 @@ public final class Repositories {
     public static void writeIntoDataBase(List<PetrolStations> petrolStationsList, int numberOfReports) throws SQLException {
         try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)
         ){
-            createDatabase(conn, DB_NAME);
+            createDatabase(conn);
             conn.setCatalog(DB_NAME.toLowerCase());
             createTables(conn);
             insertData(petrolStationsList, conn, numberOfReports);
@@ -63,20 +67,20 @@ public final class Repositories {
         }
     }
 
-    private static void createDatabase(Connection conn, String dbName) throws SQLException {
-            if(databaseExists(conn, dbName)) return;
+    private static void createDatabase(Connection conn) throws SQLException {
+            if(databaseExists(conn)) return;
 
             try(Statement stmt = conn.createStatement()) {
-                String sql = "CREATE DATABASE " + dbName;
+                String sql = "CREATE DATABASE " + DB_NAME;
                 stmt.executeUpdate(sql);
             }
     }
 
-    private static boolean databaseExists(Connection conn, String dbName) throws SQLException {
+    private static boolean databaseExists(Connection conn) throws SQLException {
         try(ResultSet rs = conn.getMetaData().getCatalogs()){
             while(rs.next()){
                 String s = rs.getString(1);
-                if(s.equals(dbName.toLowerCase())) return true;
+                if(s.equals(DB_NAME.toLowerCase())) return true;
             }
         }
         return false;
@@ -85,8 +89,8 @@ public final class Repositories {
     private static void insertData(List<PetrolStations> petrolStationsList, Connection conn, int numberOfReports) throws SQLException {
         int fuelId;
         int psId;
-        HashMap<String, Integer> fuelsHashMap = getHashMap(conn, FUELS_TABLE_NAME);
-        HashMap<String, Integer> petrolStationHashMap = getHashMap(conn, PETROL_STATIONS_TABLE_NAME);
+        HashMap<String, Integer> fuelsHashMap = getMapOfIdsByName(conn, FUELS_TABLE_NAME, DISTINCTION_COLUMN_FUELS);
+        HashMap<String, Integer> petrolStationHashMap = getMapOfIdsByName(conn, PETROL_STATIONS_TABLE_NAME, DISTINCTION_COLUMN_PS);
 
         int count = 1;
         for (PetrolStations p : petrolStationsList) {
@@ -114,7 +118,7 @@ public final class Repositories {
     }
 
     private static int insertIntoPetrolStations(PetrolStation petrolStation, HashMap<String, Integer> petrolStationHashMap, Connection conn) throws SQLException {
-        if(petrolStationHashMap.containsKey(petrolStation.getName())) return petrolStationHashMap.get(petrolStation.getName());
+        if(petrolStationHashMap.containsKey(petrolStation.getName().toLowerCase())) return petrolStationHashMap.get(petrolStation.getName().toLowerCase());
         String sql = "INSERT INTO PETROL_STATIONS (name, address, city) VALUES (?, ?, ?);";
         int id = 0;
 
@@ -126,29 +130,27 @@ public final class Repositories {
 
             ResultSet rs = preparedStatement.getGeneratedKeys();
             if(rs.next()) id = rs.getInt(1);
-            if(rs != null && !rs.isClosed()) rs.close();
 
-            petrolStationHashMap.put(petrolStation.getName(), id);
+            petrolStationHashMap.put(petrolStation.getName().toLowerCase(), id);
             return id;
         }
     }
 
-    private static HashMap<String, Integer> getHashMap(Connection conn, String tableName) throws SQLException {
+    private static HashMap<String, Integer> getMapOfIdsByName(Connection conn, String tableName, String columnName) throws SQLException {
         HashMap<String, Integer> hashMap = new HashMap<>();
         String sql = "SELECT * FROM " + tableName + ";";
 
         try(Statement stmt = conn.createStatement()){
             ResultSet rs = stmt.executeQuery(sql);
             while(rs.next()){
-                hashMap.put(rs.getString(2), Integer.valueOf(rs.getString(1)));
+                hashMap.put(rs.getString(columnName).toLowerCase(), Integer.valueOf(rs.getString(1)));
             }
-            if(rs != null && !rs.isClosed()) rs.close();
         }
         return hashMap;
     }
 
     private static int insertIntoFuels(Fuel fuel, HashMap<String, Integer> fuelsHashMap, Connection conn) throws SQLException {
-        if(fuelsHashMap.containsKey(fuel.getType())) return fuelsHashMap.get(fuel.getType());
+        if(fuelsHashMap.containsKey(fuel.getType().toLowerCase())) return fuelsHashMap.get(fuel.getType().toLowerCase());
         String sql = "INSERT INTO FUELS (name) VALUES (?);";
         int id = 0;
 
@@ -158,9 +160,8 @@ public final class Repositories {
 
             ResultSet rs = preparedStatement.getGeneratedKeys();
             if (rs.next()) id = rs.getInt(1);
-            if(rs != null && !rs.isClosed()) rs.close();
 
-            fuelsHashMap.put(fuel.getType(), id);
+            fuelsHashMap.put(fuel.getType().toLowerCase(), id);
             return id;
         }
     }
