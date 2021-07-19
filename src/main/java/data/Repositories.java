@@ -3,17 +3,9 @@ package data;
 import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
-import business.services.SFTPDownloader;
-import business.services.XMLParser;
-import org.xml.sax.SAXException;
 import properties.PropertiesCache;
-import properties.SQLHandler;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,11 +32,10 @@ public final class Repositories {
 
     private Repositories(){}
 
-    private static void writeIntoDataBase(List<PetrolStations> petrolStationsList, int numberOfReports) throws SQLException {
-        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD);
-            Statement stmt = conn.createStatement()
+    public static void writeIntoDataBase(List<PetrolStations> petrolStationsList, int numberOfReports) throws SQLException {
+        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)
         ){
-            createDatabase(conn, stmt, DB_NAME);
+            createDatabase(conn, DB_NAME);
             conn.setCatalog(DB_NAME.toLowerCase());
             createTables(conn);
             insertData(petrolStationsList, conn, numberOfReports);
@@ -53,13 +44,9 @@ public final class Repositories {
 
     private static void createTables(Connection conn) throws SQLException {
         try(Statement stmt = conn.createStatement()) {
-            String fuelSQL = SQLHandler.FUELS_TABLE_SQL;
-            String psSQL = SQLHandler.PETROL_STATIONS_TABLE_SQL;
-            String plSQL = SQLHandler.PRICE_LIST_TABLE_SQL;
-
-            createTable(FUELS_TABLE_NAME, fuelSQL, stmt, conn);
-            createTable(PETROL_STATIONS_TABLE_NAME, psSQL, stmt, conn);
-            createTable(PRICE_LIST_TABLE_NAME, plSQL, stmt, conn);
+            createTable(FUELS_TABLE_NAME, SQLHandler.FUELS_TABLE_SQL, stmt, conn);
+            createTable(PETROL_STATIONS_TABLE_NAME, SQLHandler.PETROL_STATIONS_TABLE_SQL, stmt, conn);
+            createTable(PRICE_LIST_TABLE_NAME, SQLHandler.PRICE_LIST_TABLE_SQL, stmt, conn);
         }
     }
 
@@ -76,11 +63,13 @@ public final class Repositories {
         }
     }
 
-    private static void createDatabase(Connection conn, Statement stmt, String dbName) throws SQLException {
-            if(databaseExists(conn,dbName)) return;
+    private static void createDatabase(Connection conn, String dbName) throws SQLException {
+            if(databaseExists(conn, dbName)) return;
 
-            String sql = "CREATE DATABASE " + dbName;
-            stmt.executeUpdate(sql);
+            try(Statement stmt = conn.createStatement()) {
+                String sql = "CREATE DATABASE " + dbName;
+                stmt.executeUpdate(sql);
+            }
     }
 
     private static boolean databaseExists(Connection conn, String dbName) throws SQLException {
@@ -114,10 +103,7 @@ public final class Repositories {
     }
 
     private static void insertIntoPriceList(PetrolStation petrolStation, int psId, Fuel fuel, int fuelId, Connection conn, int id) throws SQLException {
-        String sql = "INSERT INTO PRICE_LIST (id, petrol_station_id, fuel_id, price, date)" +
-                " VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE " +
-                "id = id, petrol_station_id = petrol_station_id, fuel_id = fuel_id, price = price, date = date;";
-        try(PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+        try(PreparedStatement preparedStatement = conn.prepareStatement(SQLHandler.PRICE_LIST_INSERT_SQL)){
             preparedStatement.setInt(1, id);
             preparedStatement.setInt(2, psId);
             preparedStatement.setInt(3, fuelId);
@@ -129,7 +115,7 @@ public final class Repositories {
 
     private static int insertIntoPetrolStations(PetrolStation petrolStation, HashMap<String, Integer> petrolStationHashMap, Connection conn) throws SQLException {
         if(petrolStationHashMap.containsKey(petrolStation.getName())) return petrolStationHashMap.get(petrolStation.getName());
-        String sql = "INSERT INTO PETROL_STATIONS (name, adress, city) VALUES (?, ?, ?);";
+        String sql = "INSERT INTO PETROL_STATIONS (name, address, city) VALUES (?, ?, ?);";
         int id = 0;
 
         try(PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
@@ -166,7 +152,7 @@ public final class Repositories {
         String sql = "INSERT INTO FUELS (name) VALUES (?);";
         int id = 0;
 
-        try(PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);){
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             preparedStatement.setString(1, fuel.getType());
             preparedStatement.executeUpdate();
 
@@ -177,23 +163,5 @@ public final class Repositories {
             fuelsHashMap.put(fuel.getType(), id);
             return id;
         }
-    }
-
-    public static void main(String[] args) {
-        try {
-            //SFTPDownloader.downloadFiles();
-            writeIntoDataBase(returnPetrolStations(), 5);
-        } catch (SQLException | IOException | SAXException | ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
-//     TODO:THIS IS ONLY FOR TESTING
-    private static List<PetrolStations> returnPetrolStations() throws IOException, SAXException, ParserConfigurationException {
-        List<PetrolStations> petrolStations = new ArrayList<>();
-        File[] files = new File(SFTPDownloader.LOCAL_DIRECTORY).listFiles();
-        for (File file : files) {
-            petrolStations.add(XMLParser.parsePetrolStationsXML(SFTPDownloader.LOCAL_DIRECTORY + "/" + file.getName()));
-        }
-        return petrolStations;
     }
 }
