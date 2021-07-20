@@ -25,7 +25,6 @@ public abstract class SFTPDownloader {
         PASSWORD = properties.getProperty("serverPassword");
         SFTP_WORKING_DIR = properties.getProperty("sftpWorkingDir");
         KNOWN_HOSTS = properties.getProperty("knownHosts");
-        //TODO: Remove this!
         LOCAL_DIRECTORY = properties.getProperty("localDirectory");
         PORT = Integer.parseInt(properties.getProperty("port"));
         PATH_SEPARATOR = properties.getProperty("pathSeparator");
@@ -49,7 +48,7 @@ public abstract class SFTPDownloader {
             channelSftp.connect();
 
             channelSftp.cd(SFTP_WORKING_DIR);
-            downloadFromFolder(channelSftp, SFTP_WORKING_DIR, localDirectoryPath);
+            downloadFromFolder(channelSftp, localDirectoryPath);
             channelSftp.exit();
             jschSession.disconnect();
     }
@@ -61,8 +60,8 @@ public abstract class SFTPDownloader {
         if(!properlyMade) throw new FileNotFoundException();
     }
 
-    private static void downloadFromFolder(ChannelSftp channelSftp, String folder, String localDirectoryPath) throws SftpException {
-        Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(folder);
+    private static void downloadFromFolder(ChannelSftp channelSftp, String localDirectoryPath) throws SftpException {
+        Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(SFTP_WORKING_DIR);
         System.out.println(entries);
 
         for (ChannelSftp.LsEntry en : entries){
@@ -70,7 +69,7 @@ public abstract class SFTPDownloader {
                 continue;
             }
             System.out.println(en.getFilename());
-            channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), localDirectoryPath + PATH_SEPARATOR + en.getFilename());
+            channelSftp.get(SFTP_WORKING_DIR + PATH_SEPARATOR + en.getFilename(), localDirectoryPath + PATH_SEPARATOR + en.getFilename());
         }
     }
 }

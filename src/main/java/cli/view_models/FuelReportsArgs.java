@@ -1,13 +1,13 @@
 package cli.view_models;
 
 import business.services.SFTPDownloader;
+import business.services.XMLParser;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import data.Repositories;
 import org.xml.sax.SAXException;
-import temporary.Main;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class FuelReportsArgs {
     public class ProcessCommand{
         public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
             SFTPDownloader.downloadFiles(path);
-            Repositories.writeIntoDataBase(Main.returnPetrolStations(path), 7000);
+            Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 5000);
         }
     }
 
@@ -36,7 +36,7 @@ public class FuelReportsArgs {
                 validateWith = DirectoryParameterValidator.class,
                 description = "A directory where the date files are stored locally"
         )
-        private String destinationDir = "src/main/resources/data";
+        private String destinationDir;
 
         public String getDestinationDir() {
             return destinationDir;
@@ -45,11 +45,9 @@ public class FuelReportsArgs {
         public ConfigCommand() throws SQLException {
             destinationDir = Repositories.getDefaultDestination();
         }
-    }
 
-    @Parameters(commandNames = {"report"},
-                commandDescription = "Executes a report")
-    public class ReportCommand{
-
+        public void config() throws SQLException {
+            Repositories.updateDefaultDestination(destinationDir);
+        }
     }
 }

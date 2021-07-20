@@ -4,7 +4,6 @@ import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
-import com.sun.xml.internal.bind.v2.TODO;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -171,12 +170,14 @@ public final class Repositories {
     }
 
     public static String getDefaultDestination() throws SQLException {
-        String sql = SQLHandler.CONFIG_TABLE_SQL;
+        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)){
+            createDatabase(conn);
 
-        try(Connection conn = DriverManager.getConnection(DB_URL + DB_NAME, USER_NAME, PASSWORD);
-            Statement stmt = conn.createStatement()){
-            createTable(CONFIG_TABLE_NAME, sql, stmt, conn);
-            return getPath(conn);
+            conn.setCatalog(DB_NAME.toLowerCase());
+            try(Statement stmt = conn.createStatement()) {
+                createTable(CONFIG_TABLE_NAME, SQLHandler.CONFIG_TABLE_SQL, stmt, conn);
+                return getPath(conn);
+            }
         }
     }
 
@@ -186,8 +187,16 @@ public final class Repositories {
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.next()) return rs.getString(1);
         }
-        //TODO: Change this!
         return SFTPDownloader.LOCAL_DIRECTORY;
     }
 
+    public static void updateDefaultDestination(String directoryPath) throws SQLException {
+        String sql = "INSERT INTO CONFIG (id, directory_path) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = id, directory_path = '" + directoryPath + "';";
+        try(Connection conn = DriverManager.getConnection(DB_URL + DB_NAME, USER_NAME, PASSWORD);
+            PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+            preparedStatement.setInt(1, 1);
+            preparedStatement.setString(2, directoryPath);
+            preparedStatement.executeUpdate();
+        }
+    }
 }

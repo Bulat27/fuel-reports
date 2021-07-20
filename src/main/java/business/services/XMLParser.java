@@ -17,7 +17,16 @@ public final class XMLParser {
 
     private XMLParser() { }
 
-    public static PetrolStations parsePetrolStationsXML(String docPath) throws ParserConfigurationException, IOException, SAXException {
+    public static List<PetrolStations> returnPetrolStations(String localDirectoryPath) throws IOException, SAXException, ParserConfigurationException {
+        List<PetrolStations> petrolStations = new ArrayList<>();
+        File[] files = new File(localDirectoryPath).listFiles();
+        for (File file : files) {
+            petrolStations.add(XMLParser.parsePetrolStationsXML(localDirectoryPath + "/" + file.getName()));
+        }
+        return petrolStations;
+    }
+
+    private static PetrolStations parsePetrolStationsXML(String docPath) throws ParserConfigurationException, IOException, SAXException {
         List<PetrolStation> petrolStations = new ArrayList<>();
         LocalDate date;
         PetrolStation petrolStation;
