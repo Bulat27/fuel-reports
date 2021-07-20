@@ -25,6 +25,7 @@ public abstract class SFTPDownloader {
         PASSWORD = properties.getProperty("serverPassword");
         SFTP_WORKING_DIR = properties.getProperty("sftpWorkingDir");
         KNOWN_HOSTS = properties.getProperty("knownHosts");
+        //TODO: Remove this!
         LOCAL_DIRECTORY = properties.getProperty("localDirectory");
         PORT = Integer.parseInt(properties.getProperty("port"));
         PATH_SEPARATOR = properties.getProperty("pathSeparator");
@@ -41,26 +42,26 @@ public abstract class SFTPDownloader {
         return jschSession;
     }
 
-    public static void downloadFiles() throws FileNotFoundException, JSchException, SftpException {
-            makeLocalDirectory();
+    public static void downloadFiles(String path) throws FileNotFoundException, JSchException, SftpException {
+            makeLocalDirectory(path);
             Session jschSession = setupJsch();
             ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
 
             channelSftp.cd(SFTP_WORKING_DIR);
-            downloadFromFolder(channelSftp, SFTP_WORKING_DIR);
+            downloadFromFolder(channelSftp, SFTP_WORKING_DIR, path);
             channelSftp.exit();
             jschSession.disconnect();
     }
 
-    private static void makeLocalDirectory() throws FileNotFoundException {
-        if(new File(LOCAL_DIRECTORY).exists()) return;
+    private static void makeLocalDirectory(String path) throws FileNotFoundException {
+        if(new File(path).exists()) return;
 
-        boolean properlyMade = new File(LOCAL_DIRECTORY).mkdir();
+        boolean properlyMade = new File(path).mkdir();
         if(!properlyMade) throw new FileNotFoundException();
     }
 
-    private static void downloadFromFolder(ChannelSftp channelSftp, String folder) throws SftpException {
+    private static void downloadFromFolder(ChannelSftp channelSftp, String folder, String path) throws SftpException {
         Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(folder);
         System.out.println(entries);
 
@@ -69,7 +70,7 @@ public abstract class SFTPDownloader {
                 continue;
             }
             System.out.println(en.getFilename());
-            channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), LOCAL_DIRECTORY + PATH_SEPARATOR + en.getFilename());
+            channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), path + PATH_SEPARATOR + en.getFilename());
         }
     }
 }
