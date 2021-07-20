@@ -42,14 +42,14 @@ public abstract class SFTPDownloader {
         return jschSession;
     }
 
-    public static void downloadFiles(String path) throws FileNotFoundException, JSchException, SftpException {
-            makeLocalDirectory(path);
+    public static void downloadFiles(String localDirectoryPath) throws FileNotFoundException, JSchException, SftpException {
+            makeLocalDirectory(localDirectoryPath);
             Session jschSession = setupJsch();
             ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
             channelSftp.connect();
 
             channelSftp.cd(SFTP_WORKING_DIR);
-            downloadFromFolder(channelSftp, SFTP_WORKING_DIR, path);
+            downloadFromFolder(channelSftp, SFTP_WORKING_DIR, localDirectoryPath);
             channelSftp.exit();
             jschSession.disconnect();
     }
@@ -61,7 +61,7 @@ public abstract class SFTPDownloader {
         if(!properlyMade) throw new FileNotFoundException();
     }
 
-    private static void downloadFromFolder(ChannelSftp channelSftp, String folder, String path) throws SftpException {
+    private static void downloadFromFolder(ChannelSftp channelSftp, String folder, String localDirectoryPath) throws SftpException {
         Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(folder);
         System.out.println(entries);
 
@@ -70,7 +70,7 @@ public abstract class SFTPDownloader {
                 continue;
             }
             System.out.println(en.getFilename());
-            channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), path + PATH_SEPARATOR + en.getFilename());
+            channelSftp.get(folder + PATH_SEPARATOR + en.getFilename(), localDirectoryPath + PATH_SEPARATOR + en.getFilename());
         }
     }
 }

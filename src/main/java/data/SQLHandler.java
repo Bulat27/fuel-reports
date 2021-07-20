@@ -6,6 +6,7 @@ public final class SQLHandler {
     public static final String PETROL_STATIONS_TABLE_SQL;
     public static final String PRICE_LIST_TABLE_SQL;
     public static final String PRICE_LIST_INSERT_SQL;
+    public static final String CONFIG_TABLE_SQL;
 
     private SQLHandler(){}
 
@@ -38,5 +39,11 @@ public final class SQLHandler {
        PRICE_LIST_INSERT_SQL = "INSERT INTO PRICE_LIST (id, petrol_station_id, fuel_id, price, date)" +
                " VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE " +
                "id = id, petrol_station_id = petrol_station_id, fuel_id = fuel_id, price = price, date = date;";
+
+       CONFIG_TABLE_SQL = "CREATE TABLE CONFIG(\n" +
+               "\tid INT,\n" +
+               "    directory_path VARCHAR(100) NOT NULL,\n" +
+               "    PRIMARY KEY (id)\n" +
+               ");";
     }
 }

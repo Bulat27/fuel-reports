@@ -10,7 +10,6 @@ import org.xml.sax.SAXException;
 import temporary.Main;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -23,9 +22,8 @@ public class FuelReportsArgs {
     public class ProcessCommand{
         public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
             SFTPDownloader.downloadFiles(path);
-            Repositories.writeIntoDataBase(Main.returnPetrolStations(path), 5000);
+            Repositories.writeIntoDataBase(Main.returnPetrolStations(path), 7000);
         }
-
     }
 
     @Parameters(commandNames = {"config"},
@@ -35,12 +33,17 @@ public class FuelReportsArgs {
         @Parameter(
                 names = "--data-dir",
                 required = true,
+                validateWith = DirectoryParameterValidator.class,
                 description = "A directory where the date files are stored locally"
         )
-        private String destinationDir = "src/main/resources/datas";
+        private String destinationDir = "src/main/resources/data";
 
         public String getDestinationDir() {
             return destinationDir;
+        }
+
+        public ConfigCommand() throws SQLException {
+            destinationDir = Repositories.getDefaultDestination();
         }
     }
 

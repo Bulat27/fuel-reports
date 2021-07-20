@@ -20,7 +20,7 @@ import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
 //        try {
 //            SFTPDownloader.downloadFiles();
 //            Repositories.writeIntoDataBase(returnPetrolStations(), 5000);
@@ -45,18 +45,22 @@ public class Main {
                 } catch (JSchException | SQLException | SAXException | ParserConfigurationException | IOException | SftpException e) {
                     e.printStackTrace();
                 }
+                break;
             case "report":
-
+            //TODO: This doesn't handle the exception properly, it's thrown before this, I need to catch it.
+                break;
+            default:
+                System.err.println("Invalid command " + parsedCmdStr);
         }
 
 
     }
     //TODO: Put this is some other class!
-    public static List<PetrolStations> returnPetrolStations(String path) throws IOException, SAXException, ParserConfigurationException {
+    public static List<PetrolStations> returnPetrolStations(String localDirectoryPath) throws IOException, SAXException, ParserConfigurationException {
         List<PetrolStations> petrolStations = new ArrayList<>();
-        File[] files = new File(path).listFiles();
+        File[] files = new File(localDirectoryPath).listFiles();
         for (File file : files) {
-            petrolStations.add(XMLParser.parsePetrolStationsXML(path + "/" + file.getName()));
+            petrolStations.add(XMLParser.parsePetrolStationsXML(localDirectoryPath + "/" + file.getName()));
         }
         return petrolStations;
     }

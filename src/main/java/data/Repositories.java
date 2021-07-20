@@ -3,6 +3,8 @@ package data;
 import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
+import business.services.SFTPDownloader;
+import com.sun.xml.internal.bind.v2.TODO;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -18,6 +20,7 @@ public final class Repositories {
     private static final String FUELS_TABLE_NAME;
     private static final String PETROL_STATIONS_TABLE_NAME;
     private static final String PRICE_LIST_TABLE_NAME;
+    private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
     private static final String DISTINCTION_COLUMN_PS;
 
@@ -30,6 +33,7 @@ public final class Repositories {
         FUELS_TABLE_NAME = "FUELS";
         PETROL_STATIONS_TABLE_NAME = "PETROL_STATIONS";
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
+        CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
         DISTINCTION_COLUMN_PS = "name";
     }
@@ -165,4 +169,25 @@ public final class Repositories {
             return id;
         }
     }
+
+    public static String getDefaultDestination() throws SQLException {
+        String sql = SQLHandler.CONFIG_TABLE_SQL;
+
+        try(Connection conn = DriverManager.getConnection(DB_URL + DB_NAME, USER_NAME, PASSWORD);
+            Statement stmt = conn.createStatement()){
+            createTable(CONFIG_TABLE_NAME, sql, stmt, conn);
+            return getPath(conn);
+        }
+    }
+
+    private static String getPath(Connection conn) throws SQLException {
+        String sql = "SELECT directory_path FROM CONFIG WHERE id = 1;";
+        try(Statement stmt = conn.createStatement()){
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()) return rs.getString(1);
+        }
+        //TODO: Change this!
+        return SFTPDownloader.LOCAL_DIRECTORY;
+    }
+
 }
