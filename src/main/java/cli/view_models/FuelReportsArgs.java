@@ -15,39 +15,39 @@ import java.sql.SQLException;
 
 public class FuelReportsArgs {
 
-    @Parameters(
-            commandNames = {"process"},
-            commandDescription = "Deserializing all new data"
-    )
-    public class ProcessCommand{
-        public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
-            SFTPDownloader.downloadFiles(path);
-            Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 5000);
-        }
-    }
+//    @Parameters(
+//            commandNames = {"process"},
+//            commandDescription = "Deserializing all new data"
+//    )
+//    public class ProcessCommand{
+//        public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
+//            SFTPDownloader.downloadFiles(path);
+//            Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 5000);
+//        }
+//    }
 
-    @Parameters(commandNames = {"config"},
-                commandDescription = "Configures your local directory")
-    public class ConfigCommand{
-
-        @Parameter(
-                names = "--data-dir",
-                required = true,
-                validateWith = DirectoryParameterValidator.class,
-                description = "A directory where the date files are stored locally"
-        )
-        private String destinationDir;
-
-        public String getDestinationDir() {
-            return destinationDir;
-        }
-
-        public ConfigCommand() throws SQLException {
-            destinationDir = Repositories.getDefaultDestination();
-        }
-
-        public void config() throws SQLException {
-            Repositories.updateDefaultDestination(destinationDir);
-        }
-    }
+//    @Parameters(commandNames = {"config"},
+//                commandDescription = "Configures your local directory")
+//    public class ConfigCommand{
+//
+//        @Parameter(
+//                names = "--data-dir",
+//                required = true,
+//                validateWith = DirectoryParameterValidator.class,
+//                description = "A directory where the date files are stored locally"
+//        )
+//        private String destinationDir;
+//
+//        public String getDestinationDir() {
+//            return destinationDir;
+//        }
+//
+//        public ConfigCommand() throws SQLException {
+//            destinationDir = Repositories.getDefaultDestination();
+//        }
+//
+//        public void config() throws SQLException {
+//            Repositories.updateDefaultDestination(destinationDir);
+//        }
+//    }
 }

@@ -1,6 +1,8 @@
-package temporary;
+package main;
 
+import cli.view_models.ConfigCommand;
 import cli.view_models.FuelReportsArgs;
+import cli.view_models.ProcessCommand;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.jcraft.jsch.JSchException;
@@ -18,8 +20,8 @@ public class Main {
 
         try {
             FuelReportsArgs mainCommand = new FuelReportsArgs();
-            FuelReportsArgs.ProcessCommand processCommand = mainCommand.new ProcessCommand();
-            FuelReportsArgs.ConfigCommand configCommand = mainCommand.new ConfigCommand();
+            ProcessCommand processCommand = new ProcessCommand();
+            ConfigCommand configCommand = new ConfigCommand();
 
             jc = JCommander.newBuilder().addCommand(configCommand).addCommand(processCommand).build();
             jc.parse(args);
@@ -40,6 +42,7 @@ public class Main {
         }catch (ParameterException e){
             if(jc != null) jc.usage();
             System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
     }
 }
