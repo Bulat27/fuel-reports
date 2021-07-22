@@ -257,10 +257,17 @@ public final class Repositories {
         }
         return count;
     }
-    //TODO: Log the message if the rs is empty!
+
     private static void printTheResultSet(ResultSet rs) throws SQLException {
+        if(!rs.isBeforeFirst()){
+            LOGGER.info("There are no reports data for the given flags!");
+            return;
+        }
+
         while(rs.next()){
-            System.out.println("Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2));
+            //TODO: Format the price values to 2 decimals!
+            String s ="Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2);
+            LOGGER.info(s);
         }
     }
 
@@ -276,35 +283,35 @@ public final class Repositories {
         }
         return true;
     }
-    //TODO: Use String builder!
+
     private static String generateReportQuery(String[] strArr, String fuelType, String ps, String city, List<String> addedParameters) {
-        String sql = SQLHandler.REPORT_SQL;
+        StringBuilder sql = new StringBuilder(SQLHandler.REPORT_SQL);
 
         if(strArr.length >= 2){
-            sql += "AND EXTRACT(MONTH FROM pl.date) = ? ";
+            sql.append("AND EXTRACT(MONTH FROM pl.date) = ? ");
             addedParameters.add("month");
         }
 
         if(strArr.length >= 3){
-            sql += "AND EXTRACT(DAY FROM pl.date) = ? ";
+            sql.append("AND EXTRACT(DAY FROM pl.date) = ? ");
             addedParameters.add("day");
         }
 
         if(fuelType != null){
-            sql += "AND f.name = ? ";
+            sql.append("AND f.name = ? ");
             addedParameters.add("fuelType");
         }
 
         if(ps != null){
-            sql += "AND ps.name = ? ";
+            sql.append("AND ps.name = ? ");
             addedParameters.add("ps");
         }
 
         if(city != null){
-            sql += "AND ps.city = ? ";
+            sql.append("AND ps.city = ? ");
             addedParameters.add("city");
         }
-        sql += "GROUP BY fuel_id;";
-        return sql;
+        sql.append("GROUP BY fuel_id;");
+        return sql.toString();
     }
 }
