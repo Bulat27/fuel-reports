@@ -3,6 +3,7 @@ package data;
 import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
+import business.services.SFTPDownloader;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -18,8 +19,8 @@ public final class Repositories {
     private static final String FUELS_TABLE_NAME;
     private static final String PETROL_STATIONS_TABLE_NAME;
     private static final String PRICE_LIST_TABLE_NAME;
+    private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
-    private static final String DISTINCTION_COLUMN_PS;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -30,8 +31,8 @@ public final class Repositories {
         FUELS_TABLE_NAME = "FUELS";
         PETROL_STATIONS_TABLE_NAME = "PETROL_STATIONS";
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
+        CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
-        DISTINCTION_COLUMN_PS = "name";
     }
 
     private Repositories(){}
@@ -89,8 +90,8 @@ public final class Repositories {
     private static void insertData(List<PetrolStations> petrolStationsList, Connection conn, int numberOfReports) throws SQLException {
         int fuelId;
         int psId;
-        HashMap<String, Integer> fuelsHashMap = getMapOfIdsByName(conn, FUELS_TABLE_NAME, DISTINCTION_COLUMN_FUELS);
-        HashMap<String, Integer> petrolStationHashMap = getMapOfIdsByName(conn, PETROL_STATIONS_TABLE_NAME, DISTINCTION_COLUMN_PS);
+        HashMap<String, Integer> fuelsHashMap = getMapOfIdsByName(conn);
+        HashMap<String, Integer> petrolStationHashMap = getMapOfIdsByPSKey(conn);
 
         int count = 1;
         for (PetrolStations p : petrolStationsList) {
@@ -118,7 +119,8 @@ public final class Repositories {
     }
 
     private static int insertIntoPetrolStations(PetrolStation petrolStation, HashMap<String, Integer> petrolStationHashMap, Connection conn) throws SQLException {
-        if(petrolStationHashMap.containsKey(petrolStation.getName().toLowerCase())) return petrolStationHashMap.get(petrolStation.getName().toLowerCase());
+        String petrolStationKey = getPetrolStationKey(petrolStation);
+        if(petrolStationHashMap.containsKey(petrolStationKey)) return petrolStationHashMap.get(petrolStationKey);
         String sql = "INSERT INTO PETROL_STATIONS (name, address, city) VALUES (?, ?, ?);";
         int id = 0;
 
@@ -131,19 +133,40 @@ public final class Repositories {
             ResultSet rs = preparedStatement.getGeneratedKeys();
             if(rs.next()) id = rs.getInt(1);
 
-            petrolStationHashMap.put(petrolStation.getName().toLowerCase(), id);
+            petrolStationHashMap.put(petrolStationKey, id);
             return id;
         }
     }
 
-    private static HashMap<String, Integer> getMapOfIdsByName(Connection conn, String tableName, String columnName) throws SQLException {
+    private static String getPetrolStationKey(PetrolStation pS){
+        return (pS.getName() + pS.getAddress() + pS.getCity()).toLowerCase();
+    }
+
+    private static String getPetrolStationKey(ResultSet rs) throws SQLException {
+        return (rs.getString("name") + rs.getString("address") + rs.getString("city")).toLowerCase();
+    }
+
+    private static HashMap<String, Integer> getMapOfIdsByName(Connection conn) throws SQLException {
         HashMap<String, Integer> hashMap = new HashMap<>();
-        String sql = "SELECT * FROM " + tableName + ";";
+        String sql = "SELECT * FROM " + FUELS_TABLE_NAME + ";";
 
         try(Statement stmt = conn.createStatement()){
             ResultSet rs = stmt.executeQuery(sql);
             while(rs.next()){
-                hashMap.put(rs.getString(columnName).toLowerCase(), Integer.valueOf(rs.getString(1)));
+                hashMap.put(rs.getString(DISTINCTION_COLUMN_FUELS).toLowerCase(), Integer.valueOf(rs.getString(1)));
+            }
+        }
+        return hashMap;
+    }
+
+    private static HashMap<String, Integer> getMapOfIdsByPSKey(Connection conn) throws SQLException {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        String sql = "SELECT * FROM " + PETROL_STATIONS_TABLE_NAME + ";";
+
+        try(Statement stmt = conn.createStatement()){
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+                hashMap.put(getPetrolStationKey(rs), Integer.valueOf(rs.getString(1)));
             }
         }
         return hashMap;
@@ -163,6 +186,37 @@ public final class Repositories {
 
             fuelsHashMap.put(fuel.getType().toLowerCase(), id);
             return id;
+        }
+    }
+
+    public static String getDefaultDestination() throws SQLException {
+        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)){
+            createDatabase(conn);
+
+            conn.setCatalog(DB_NAME.toLowerCase());
+            try(Statement stmt = conn.createStatement()) {
+                createTable(CONFIG_TABLE_NAME, SQLHandler.CONFIG_TABLE_SQL, stmt, conn);
+                return getPath(conn);
+            }
+        }
+    }
+
+    private static String getPath(Connection conn) throws SQLException {
+        String sql = "SELECT directory_path FROM CONFIG WHERE id = 1;";
+        try(Statement stmt = conn.createStatement()){
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()) return rs.getString(1);
+        }
+        return SFTPDownloader.LOCAL_DIRECTORY;
+    }
+
+    public static void updateDefaultDestination(String directoryPath) throws SQLException {
+        String sql = "INSERT INTO CONFIG (id, directory_path) VALUES (?, ?) ON DUPLICATE KEY UPDATE id = id, directory_path = '" + directoryPath + "';";
+        try(Connection conn = DriverManager.getConnection(DB_URL + DB_NAME, USER_NAME, PASSWORD);
+            PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+            preparedStatement.setInt(1, 1);
+            preparedStatement.setString(2, directoryPath);
+            preparedStatement.executeUpdate();
         }
     }
 }
