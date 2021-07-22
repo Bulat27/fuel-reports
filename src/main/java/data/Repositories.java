@@ -4,6 +4,8 @@ import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -22,6 +24,7 @@ public final class Repositories {
     private static final String PRICE_LIST_TABLE_NAME;
     private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
+    private static final Logger LOGGER;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -34,6 +37,7 @@ public final class Repositories {
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
         CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
+        LOGGER = LoggerFactory.getLogger(Repositories.class);
     }
 
     private Repositories(){}
@@ -87,7 +91,7 @@ public final class Repositories {
         }
         return false;
     }
-
+    //TODO: Make the number of reports to be the fixed value
     private static void insertData(List<PetrolStations> petrolStationsList, Connection conn, int numberOfReports) throws SQLException {
         int fuelId;
         int psId;
@@ -239,29 +243,7 @@ public final class Repositories {
                 count = processTheParameter("fuelType", fuelType, preparedStatement, count, addedParameters);
                 count = processTheParameter("ps", ps, preparedStatement, count, addedParameters);
                 processTheParameter("city", city, preparedStatement, count, addedParameters);
-//                if(addedParameters.contains("month")){
-//                    preparedStatement.setString(count, strArr[1]);
-//                    count++;
-//                }
-//
-//                if(addedParameters.contains("day")){
-//                    preparedStatement.setString(count, strArr[2]);
-//                    count++;
-//                }
-//
-//                if(addedParameters.contains("fuelType")){
-//                    preparedStatement.setString(count, fuelType);
-//                    count++;
-//                }
-//
-//                if(addedParameters.contains("ps")){
-//                    preparedStatement.setString(count, ps);
-//                    count++;
-//                }
-//
-//                if(addedParameters.contains("city")){
-//                    preparedStatement.setString(count, city);
-//                }
+
                 ResultSet rs = preparedStatement.executeQuery();
                 printTheResultSet(rs);
             }
@@ -275,7 +257,7 @@ public final class Repositories {
         }
         return count;
     }
-
+    //TODO: Log the message if the rs is empty!
     private static void printTheResultSet(ResultSet rs) throws SQLException {
         while(rs.next()){
             System.out.println("Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2));
@@ -283,13 +265,18 @@ public final class Repositories {
     }
 
     private static boolean dataReady(Connection conn) throws SQLException {
-        //TODO: Log the proper message
-        if(!databaseExists(conn)) return false;
+        if(!databaseExists(conn)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
+            return false;
+        }
         conn.setCatalog(DB_NAME.toLowerCase());
-        if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)) return false;
+        if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
+            return false;
+        }
         return true;
     }
-
+    //TODO: Use String builder!
     private static String generateReportQuery(String[] strArr, String fuelType, String ps, String city, List<String> addedParameters) {
         String sql = SQLHandler.REPORT_SQL;
 
@@ -320,5 +307,4 @@ public final class Repositories {
         sql += "GROUP BY fuel_id;";
         return sql;
     }
-
 }
