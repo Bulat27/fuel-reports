@@ -12,7 +12,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
@@ -39,10 +38,11 @@ public class Main {
                     processCommand.process(configCommand.getDestinationDir());
                     break;
                 default:
-                    LOGGER.log(Level.FINE, "Invalid command : {0}", parsedCmdStr);
+                    String message = String.format("Invalid command: %s", parsedCmdStr);
+                    LOGGER.fine(message);
             }
         } catch (JSchException | SAXException | ParserConfigurationException | IOException | SftpException e) {
-            LOGGER.log(Level.SEVERE, e.toString(), e);
+            LOGGER.severe(e.toString());
         }catch (ParameterException e){
             if(jc != null) jc.usage();
         }
