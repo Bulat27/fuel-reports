@@ -18,6 +18,6 @@ import java.sql.SQLException;
 public class ProcessCommand {
     public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
         SFTPDownloader.downloadFiles(path);
-        Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 6000);
+        Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 5000);
     }
 }

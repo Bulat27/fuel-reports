@@ -1,7 +1,6 @@
 package main;
 
 import cli.view_models.ConfigCommand;
-//import cli.view_models.FuelReportsArgs;
 import cli.view_models.ProcessCommand;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
@@ -25,7 +24,6 @@ public class Main {
         LOGGER.addHandler(new ConsoleHandler());
 
         try {
-            //FuelReportsArgs mainCommand = new FuelReportsArgs();
             ProcessCommand processCommand = new ProcessCommand();
             ConfigCommand configCommand = new ConfigCommand();
 
