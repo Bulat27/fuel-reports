@@ -7,6 +7,7 @@ import business.services.SFTPDownloader;
 import properties.PropertiesCache;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -219,4 +220,85 @@ public final class Repositories {
             preparedStatement.executeUpdate();
         }
     }
+
+    public static void printTheReport(String period, String fuelType, String ps, String city) throws SQLException {
+        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)){
+           if(!dataReady(conn)) return;
+
+            List<String> addedParameters = new ArrayList<>();
+            String[] strArr = period.split("-");
+            String sql = generateReportQuery(strArr, fuelType, ps, city, addedParameters);
+            int count = 1;
+
+            try(PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+                preparedStatement.setInt(count, Integer.valueOf(strArr[0]));
+                count++;
+
+                if(addedParameters.contains("month")){
+                    preparedStatement.setInt(count, Integer.parseInt(strArr[1]));
+                    count++;
+                }
+
+                if(addedParameters.contains("day")){
+                    preparedStatement.setInt(count, Integer.parseInt(strArr[2]));
+                    count++;
+                }
+
+                if(addedParameters.contains("fuelType")){
+                    preparedStatement.setString(count, fuelType);
+                    count++;
+                }
+
+                if(addedParameters.contains("ps")){
+                    preparedStatement.setString(count, ps);
+                    count++;
+                }
+
+                if(addedParameters.contains("city")){
+                    preparedStatement.setString(count, city);
+
+                }
+
+            }
+        }
+    }
+
+    private static boolean dataReady(Connection conn) throws SQLException {
+        //TODO: Log the proper message
+        if(!databaseExists(conn)) return false;
+        conn.setCatalog(DB_NAME.toLowerCase());
+        if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)) return false;
+        return true;
+    }
+
+    private static String generateReportQuery(String[] strArr, String fuelType, String ps, String city, List<String> addedParameters) {
+        String sql = SQLHandler.REPORT_SQL;
+
+        if(strArr.length >= 2){
+            sql += "AND WHERE EXTRACT(MONTH FROM pl.date) = ? ";
+            addedParameters.add("month");
+        }
+
+        if(strArr.length >= 3){
+            sql += "AND WHERE EXTRACT(DAY FROM pl.date) = ? ";
+            addedParameters.add("day");
+        }
+
+        if(fuelType != null){
+            sql += "AND WHERE f.name = ? ";
+            addedParameters.add("fuelType");
+        }
+
+        if(ps != null){
+            sql += "AND WHERE ps.name = ? ";
+            addedParameters.add("ps");
+        }
+
+        if(city != null){
+            sql += "AND WHERE ps.city = ?";
+            addedParameters.add("city");
+        }
+        return sql;
+    }
+
 }

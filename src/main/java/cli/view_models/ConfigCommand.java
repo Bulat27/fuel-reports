@@ -9,6 +9,7 @@ import java.sql.SQLException;
 @Parameters(commandNames = {"config"},
         commandDescription = "Configures your local directory")
 public class ConfigCommand {
+
     @Parameter(
             names = "--data-dir",
             required = true,

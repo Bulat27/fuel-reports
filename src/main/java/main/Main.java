@@ -2,6 +2,7 @@ package main;
 
 import cli.view_models.ConfigCommand;
 import cli.view_models.ProcessCommand;
+import cli.view_models.ReportCommand;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.jcraft.jsch.JSchException;
@@ -23,10 +24,12 @@ public class Main {
         JCommander jc = null;
 
         try {
+            //FuelReportsArgs mainCommand = new FuelReportsArgs();
+            ReportCommand reportCommand = new ReportCommand();
             ProcessCommand processCommand = new ProcessCommand();
             ConfigCommand configCommand = new ConfigCommand();
 
-            jc = JCommander.newBuilder().addCommand(configCommand).addCommand(processCommand).build();
+            jc = JCommander.newBuilder().addCommand(configCommand).addCommand(processCommand).addCommand(reportCommand).build();
             jc.parse(args);
             String parsedCmdStr = jc.getParsedCommand();
 
@@ -36,6 +39,9 @@ public class Main {
                     break;
                 case "process":
                     processCommand.process(configCommand.getDestinationDir());
+                    break;
+                case "report":
+                    System.out.println("It's a valid date: " + reportCommand.getPeriod());
                     break;
                 default:
                     String message = String.format("Invalid command: %s", parsedCmdStr);
