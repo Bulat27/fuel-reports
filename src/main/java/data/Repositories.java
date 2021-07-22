@@ -231,35 +231,54 @@ public final class Repositories {
             int count = 1;
 
             try(PreparedStatement preparedStatement = conn.prepareStatement(sql)){
-                preparedStatement.setInt(count, Integer.valueOf(strArr[0]));
+                preparedStatement.setString(count, strArr[0]);
                 count++;
 
-                if(addedParameters.contains("month")){
-                    preparedStatement.setInt(count, Integer.parseInt(strArr[1]));
-                    count++;
-                }
-
-                if(addedParameters.contains("day")){
-                    preparedStatement.setInt(count, Integer.parseInt(strArr[2]));
-                    count++;
-                }
-
-                if(addedParameters.contains("fuelType")){
-                    preparedStatement.setString(count, fuelType);
-                    count++;
-                }
-
-                if(addedParameters.contains("ps")){
-                    preparedStatement.setString(count, ps);
-                    count++;
-                }
-
-                if(addedParameters.contains("city")){
-                    preparedStatement.setString(count, city);
-
-                }
-
+                if(strArr.length >= 2) count = processTheParameter("month", strArr[1], preparedStatement, count, addedParameters);
+                if(strArr.length >= 3) count = processTheParameter("day", strArr[2], preparedStatement, count, addedParameters);
+                count = processTheParameter("fuelType", fuelType, preparedStatement, count, addedParameters);
+                count = processTheParameter("ps", ps, preparedStatement, count, addedParameters);
+                processTheParameter("city", city, preparedStatement, count, addedParameters);
+//                if(addedParameters.contains("month")){
+//                    preparedStatement.setString(count, strArr[1]);
+//                    count++;
+//                }
+//
+//                if(addedParameters.contains("day")){
+//                    preparedStatement.setString(count, strArr[2]);
+//                    count++;
+//                }
+//
+//                if(addedParameters.contains("fuelType")){
+//                    preparedStatement.setString(count, fuelType);
+//                    count++;
+//                }
+//
+//                if(addedParameters.contains("ps")){
+//                    preparedStatement.setString(count, ps);
+//                    count++;
+//                }
+//
+//                if(addedParameters.contains("city")){
+//                    preparedStatement.setString(count, city);
+//                }
+                ResultSet rs = preparedStatement.executeQuery();
+                printTheResultSet(rs);
             }
+        }
+    }
+
+    private static int processTheParameter(String parameter, String value, PreparedStatement prstmt, int count, List<String> addedParameters) throws SQLException {
+        if(addedParameters.contains(parameter)) {
+            prstmt.setString(count, value);
+            count++;
+        }
+        return count;
+    }
+
+    private static void printTheResultSet(ResultSet rs) throws SQLException {
+        while(rs.next()){
+            System.out.println("Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2));
         }
     }
 
@@ -275,29 +294,30 @@ public final class Repositories {
         String sql = SQLHandler.REPORT_SQL;
 
         if(strArr.length >= 2){
-            sql += "AND WHERE EXTRACT(MONTH FROM pl.date) = ? ";
+            sql += "AND EXTRACT(MONTH FROM pl.date) = ? ";
             addedParameters.add("month");
         }
 
         if(strArr.length >= 3){
-            sql += "AND WHERE EXTRACT(DAY FROM pl.date) = ? ";
+            sql += "AND EXTRACT(DAY FROM pl.date) = ? ";
             addedParameters.add("day");
         }
 
         if(fuelType != null){
-            sql += "AND WHERE f.name = ? ";
+            sql += "AND f.name = ? ";
             addedParameters.add("fuelType");
         }
 
         if(ps != null){
-            sql += "AND WHERE ps.name = ? ";
+            sql += "AND ps.name = ? ";
             addedParameters.add("ps");
         }
 
         if(city != null){
-            sql += "AND WHERE ps.city = ?";
+            sql += "AND ps.city = ? ";
             addedParameters.add("city");
         }
+        sql += "GROUP BY fuel_id;";
         return sql;
     }
 

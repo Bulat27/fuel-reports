@@ -24,7 +24,6 @@ public class Main {
         JCommander jc = null;
 
         try {
-            //FuelReportsArgs mainCommand = new FuelReportsArgs();
             ReportCommand reportCommand = new ReportCommand();
             ProcessCommand processCommand = new ProcessCommand();
             ConfigCommand configCommand = new ConfigCommand();
@@ -41,7 +40,7 @@ public class Main {
                     processCommand.process(configCommand.getDestinationDir());
                     break;
                 case "report":
-                    System.out.println("It's a valid date: " + reportCommand.getPeriod());
+                    reportCommand.report();
                     break;
                 default:
                     String message = String.format("Invalid command: %s", parsedCmdStr);
@@ -51,6 +50,7 @@ public class Main {
             LOGGER.error(e.toString());
         }catch (ParameterException e){
             if(jc != null) jc.usage();
+            LOGGER.error(e.toString());
         }
     }
 }
