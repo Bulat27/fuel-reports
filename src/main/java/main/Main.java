@@ -6,21 +6,21 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Logger;
+
 
 public class Main {
     
-   private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws SQLException {
         JCommander jc = null;
-        LOGGER.addHandler(new ConsoleHandler());
 
         try {
             ProcessCommand processCommand = new ProcessCommand();
@@ -39,10 +39,10 @@ public class Main {
                     break;
                 default:
                     String message = String.format("Invalid command: %s", parsedCmdStr);
-                    LOGGER.fine(message);
+                    LOGGER.info(message);
             }
         } catch (JSchException | SAXException | ParserConfigurationException | IOException | SftpException e) {
-            LOGGER.severe(e.toString());
+            LOGGER.error(e.toString());
         }catch (ParameterException e){
             if(jc != null) jc.usage();
         }

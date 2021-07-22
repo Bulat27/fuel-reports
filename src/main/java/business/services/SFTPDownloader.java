@@ -1,13 +1,14 @@
 package business.services;
 
 import com.jcraft.jsch.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import properties.PropertiesCache;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Vector;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Logger;
+
 
 public abstract class SFTPDownloader {
 
@@ -19,7 +20,7 @@ public abstract class SFTPDownloader {
     public static final String LOCAL_DIRECTORY;
     private static final int PORT;
     private static final String PATH_SEPARATOR;
-    private static final java.util.logging.Logger LOGGER;
+    private static final Logger LOGGER;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -31,7 +32,7 @@ public abstract class SFTPDownloader {
         LOCAL_DIRECTORY = properties.getProperty("localDirectory");
         PORT = Integer.parseInt(properties.getProperty("port"));
         PATH_SEPARATOR = properties.getProperty("pathSeparator");
-        LOGGER = Logger.getLogger(SFTPDownloader.class.getName());
+        LOGGER = LoggerFactory.getLogger(SFTPDownloader.class);
     }
 
     private SFTPDownloader(){}
@@ -65,7 +66,6 @@ public abstract class SFTPDownloader {
     }
 
     private static void downloadFromFolder(ChannelSftp channelSftp, String localDirectoryPath) throws SftpException {
-        LOGGER.addHandler(new ConsoleHandler());
         Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(SFTP_WORKING_DIR);
         String s = String.valueOf(entries);
         LOGGER.info(s);
