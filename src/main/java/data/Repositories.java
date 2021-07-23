@@ -4,6 +4,8 @@ import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -22,6 +24,7 @@ public final class Repositories {
     private static final String PRICE_LIST_TABLE_NAME;
     private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
+    private static final Logger LOGGER;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -34,6 +37,7 @@ public final class Repositories {
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
         CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
+        LOGGER = LoggerFactory.getLogger(Repositories.class);
     }
 
     private Repositories(){}
@@ -264,10 +268,12 @@ public final class Repositories {
 
     private static boolean dataReady(Connection conn) throws SQLException {
         if(!databaseExists(conn)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
             return false;
         }
         conn.setCatalog(DB_NAME.toLowerCase());
         if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
             return false;
         }
         return true;

@@ -46,10 +46,8 @@ public class ReportCommand {
     public void report() throws SQLException {
         List<Fuel> reportList = Repositories.getTheReport(period, getJoinedList("", fuelType), getJoinedList(" ", petrolStation), getJoinedList(" ", city));
 
-        if(reportList == null){
-            LOGGER.info("The database doesn't exist! Please download the data!");
-            return;
-        }
+        if(reportList == null) return;
+
         printTheResultSet(reportList);
     }
 

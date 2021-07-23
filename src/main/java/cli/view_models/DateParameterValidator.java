@@ -29,16 +29,6 @@ public class DateParameterValidator implements IParameterValidator {
         return true;
     }
 
-    private DateTimeFormatter getFormatByValue(String value) {
-        if (value.length() <= 4) return new DateTimeFormatterBuilder().appendPattern("yyyy")
-                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
-
-        if (value.length() <= 7)
-            return new DateTimeFormatterBuilder().appendPattern("yyyy-MM").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
-
-        return new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-    }
-
     private DateTimeFormatter getFormat(String name, String value){
         if(name.equals("--period")) return getFormatByValue(value);
 
@@ -46,6 +36,16 @@ public class DateParameterValidator implements IParameterValidator {
                 .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
 
         if(name.equals("--month")) return new DateTimeFormatterBuilder().appendPattern("yyyy-MM").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
+
+        return new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
+    }
+
+    private DateTimeFormatter getFormatByValue(String value) {
+        if (value.length() <= 4) return new DateTimeFormatterBuilder().appendPattern("yyyy")
+                .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1).parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
+
+        if (value.length() <= 7)
+            return new DateTimeFormatterBuilder().appendPattern("yyyy-MM").parseDefaulting(ChronoField.DAY_OF_MONTH, 1).toFormatter();
 
         return new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
     }
