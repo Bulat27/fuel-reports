@@ -28,7 +28,7 @@ public class Fuel {
 
     @Override
     public String toString() {
-        return "type: " + type +
-                " price: " + price;
+        return "Type: " + type + "\t" +
+                " Average price: " + price;
     }
 }

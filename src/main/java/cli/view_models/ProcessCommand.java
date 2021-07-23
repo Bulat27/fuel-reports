@@ -16,6 +16,7 @@ import java.sql.SQLException;
         commandNames = {"process"},
         commandDescription = "Deserializing all new data")
 public class ProcessCommand {
+
     public void process(String path) throws JSchException, SftpException, IOException, ParserConfigurationException, SAXException, SQLException {
         SFTPDownloader.downloadFiles(path);
         Repositories.writeIntoDataBase(XMLParser.returnPetrolStations(path), 5000);

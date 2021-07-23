@@ -69,7 +69,6 @@ public abstract class SFTPDownloader {
         Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(SFTP_WORKING_DIR);
         String s = String.valueOf(entries);
         LOGGER.info(s);
-
         for (ChannelSftp.LsEntry en : entries){
             if (en.getFilename().equals(".") || en.getFilename().equals("..") || en.getAttrs().isDir()) {
                 continue;

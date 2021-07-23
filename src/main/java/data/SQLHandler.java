@@ -7,6 +7,7 @@ public final class SQLHandler {
     public static final String PRICE_LIST_TABLE_SQL;
     public static final String PRICE_LIST_INSERT_SQL;
     public static final String CONFIG_TABLE_SQL;
+    public static final String REPORT_SQL;
 
     private SQLHandler(){}
 
@@ -45,5 +46,9 @@ public final class SQLHandler {
                "    directory_path VARCHAR(100) NOT NULL,\n" +
                "    PRIMARY KEY (id)\n" +
                ");";
+
+       REPORT_SQL = "SELECT f.name, AVG(pl.price)\n" +
+               "FROM PRICE_LIST pl JOIN FUELS f ON (pl.fuel_id = f.id) JOIN PETROL_STATIONS ps ON (ps.id = pl.petrol_station_id)\n" +
+               "WHERE EXTRACT(YEAR FROM pl.date) = ? ";
     }
 }

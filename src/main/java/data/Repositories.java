@@ -4,9 +4,12 @@ import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import properties.PropertiesCache;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,6 +24,7 @@ public final class Repositories {
     private static final String PRICE_LIST_TABLE_NAME;
     private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
+    private static final Logger LOGGER;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -33,6 +37,7 @@ public final class Repositories {
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
         CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
+        LOGGER = LoggerFactory.getLogger(Repositories.class);
     }
 
     private Repositories(){}
@@ -218,5 +223,90 @@ public final class Repositories {
             preparedStatement.setString(2, directoryPath);
             preparedStatement.executeUpdate();
         }
+    }
+
+    public static List<Fuel> getTheReport(String period, String fuelType, String ps, String city) throws SQLException {
+        try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)){
+           if(!dataReady(conn)) return null;
+
+            List<String> addedParameters = new ArrayList<>();
+            String[] strArr = period.split("-");
+            String sql = generateReportQuery(strArr, fuelType, ps, city, addedParameters);
+            int count = 1;
+
+            try(PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+                preparedStatement.setString(count, strArr[0]);
+                count++;
+
+                if(strArr.length >= 2) count = processTheParameter("month", strArr[1], preparedStatement, count, addedParameters);
+                if(strArr.length >= 3) count = processTheParameter("day", strArr[2], preparedStatement, count, addedParameters);
+                count = processTheParameter("fuelType", fuelType, preparedStatement, count, addedParameters);
+                count = processTheParameter("ps", ps, preparedStatement, count, addedParameters);
+                processTheParameter("city", city, preparedStatement, count, addedParameters);
+
+                ResultSet rs = preparedStatement.executeQuery();
+                return getReportList(rs);
+            }
+        }
+    }
+
+    private static List<Fuel> getReportList(ResultSet rs) throws SQLException {
+        List<Fuel> reportList = new ArrayList<>();
+        while(rs.next()){
+            reportList.add(new Fuel(rs.getString(1), rs.getDouble(2)));
+        }
+        return reportList;
+    }
+
+    private static int processTheParameter(String parameter, String value, PreparedStatement prstmt, int count, List<String> addedParameters) throws SQLException {
+        if(addedParameters.contains(parameter)) {
+            prstmt.setString(count, value);
+            count++;
+        }
+        return count;
+    }
+
+    private static boolean dataReady(Connection conn) throws SQLException {
+        if(!databaseExists(conn)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
+            return false;
+        }
+        conn.setCatalog(DB_NAME.toLowerCase());
+        if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)){
+            LOGGER.info("The database doesn't exist! Please download the data!");
+            return false;
+        }
+        return true;
+    }
+
+    private static String generateReportQuery(String[] strArr, String fuelType, String ps, String city, List<String> addedParameters) {
+        StringBuilder sql = new StringBuilder(SQLHandler.REPORT_SQL);
+
+        if(strArr.length >= 2){
+            sql.append("AND EXTRACT(MONTH FROM pl.date) = ? ");
+            addedParameters.add("month");
+        }
+
+        if(strArr.length >= 3){
+            sql.append("AND EXTRACT(DAY FROM pl.date) = ? ");
+            addedParameters.add("day");
+        }
+
+        if(fuelType != null){
+            sql.append("AND f.name = ? ");
+            addedParameters.add("fuelType");
+        }
+
+        if(ps != null){
+            sql.append("AND ps.name = ? ");
+            addedParameters.add("ps");
+        }
+
+        if(city != null){
+            sql.append("AND ps.city = ? ");
+            addedParameters.add("city");
+        }
+        sql.append("GROUP BY fuel_id;");
+        return sql.toString();
     }
 }
