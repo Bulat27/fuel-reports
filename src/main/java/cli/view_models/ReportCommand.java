@@ -13,7 +13,7 @@ import java.util.List;
             commandDescription = "Executing a report. Reports include the average prices for the given flags.")
 public class ReportCommand {
 
-    @Parameter(names = "--period",
+    @Parameter(names = {"--period", "--day", "--month", "--year"},
                description = "Reports will be printed for the desired period.",
                required = true,
                validateWith = DateParameterValidator.class)
