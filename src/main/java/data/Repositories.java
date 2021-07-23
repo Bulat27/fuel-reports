@@ -91,7 +91,7 @@ public final class Repositories {
         }
         return false;
     }
-    //TODO: Make the number of reports to be the fixed value
+
     private static void insertData(List<PetrolStations> petrolStationsList, Connection conn, int numberOfReports) throws SQLException {
         int fuelId;
         int psId;
@@ -265,7 +265,6 @@ public final class Repositories {
         }
 
         while(rs.next()){
-            //TODO: Format the price values to 2 decimals!
             String s ="Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2);
             LOGGER.info(s);
         }

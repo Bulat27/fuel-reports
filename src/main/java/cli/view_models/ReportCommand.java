@@ -20,8 +20,9 @@ public class ReportCommand {
     private String period;
 
     @Parameter(names = "--fuel-type",
-               description = "The type of fuel for which the reports will be printed.")
-    private String fuelType;
+               description = "The type of fuel for which the reports will be printed.",
+               variableArity = true)
+    private List<String> fuelType = new ArrayList<>();
 
     @Parameter(names = "--petrol-station",
                description = "The name of the petrol station for which the reports will be printed",
@@ -33,15 +34,12 @@ public class ReportCommand {
                variableArity = true)
     private List<String> city = new ArrayList<>();
 
-    public String getPeriod() {
-        return period;
-    }
 
-    private String getJoinedList(List<String> list){
-        return list.isEmpty() ? null : String.join(" ", list);
+    private String getJoinedList(String delimiter, List<String> list){
+        return list.isEmpty() ? null : String.join(delimiter, list);
     }
 
     public void report() throws SQLException {
-        Repositories.printTheReport(period, fuelType, getJoinedList(petrolStation), getJoinedList(city));
+        Repositories.printTheReport(period, getJoinedList("", fuelType), getJoinedList(" ", petrolStation), getJoinedList(" ", city));
     }
 }
