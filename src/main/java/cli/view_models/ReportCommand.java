@@ -1,17 +1,21 @@
 package cli.view_models;
 
+import business.models.Fuel;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import data.Repositories;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Parameters(commandNames = {"report"},
             commandDescription = "Executing a report. Reports include the average prices for the given flags.")
 public class ReportCommand {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportCommand.class);
 
     @Parameter(names = {"--period", "--day", "--month", "--year"},
                description = "Reports will be printed for the desired period.",
@@ -40,6 +44,24 @@ public class ReportCommand {
     }
 
     public void report() throws SQLException {
-        Repositories.printTheReport(period, getJoinedList("", fuelType), getJoinedList(" ", petrolStation), getJoinedList(" ", city));
+        List<Fuel> reportList = Repositories.getTheReport(period, getJoinedList("", fuelType), getJoinedList(" ", petrolStation), getJoinedList(" ", city));
+
+        if(reportList == null){
+            LOGGER.info("The database doesn't exist! Please download the data!");
+            return;
+        }
+        printTheResultSet(reportList);
+    }
+
+    private static void printTheResultSet(List<Fuel> reportList){
+        if(reportList.isEmpty()){
+            LOGGER.info("There are no reports data for the given flags!");
+            return;
+        }
+
+        for (Fuel r : reportList) {
+            String report = r.toString();
+            LOGGER.info(report);
+        }
     }
 }

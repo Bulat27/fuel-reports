@@ -4,8 +4,6 @@ import business.models.Fuel;
 import business.models.PetrolStation;
 import business.models.PetrolStations;
 import business.services.SFTPDownloader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import properties.PropertiesCache;
 
 import java.sql.*;
@@ -24,7 +22,6 @@ public final class Repositories {
     private static final String PRICE_LIST_TABLE_NAME;
     private static final String CONFIG_TABLE_NAME;
     private static final String DISTINCTION_COLUMN_FUELS;
-    private static final Logger LOGGER;
 
     static{
         PropertiesCache properties = PropertiesCache.getInstance();
@@ -37,7 +34,6 @@ public final class Repositories {
         PRICE_LIST_TABLE_NAME = "PRICE_LIST";
         CONFIG_TABLE_NAME = "CONFIG";
         DISTINCTION_COLUMN_FUELS = "name";
-        LOGGER = LoggerFactory.getLogger(Repositories.class);
     }
 
     private Repositories(){}
@@ -225,9 +221,9 @@ public final class Repositories {
         }
     }
 
-    public static void printTheReport(String period, String fuelType, String ps, String city) throws SQLException {
+    public static List<Fuel> getTheReport(String period, String fuelType, String ps, String city) throws SQLException {
         try(Connection conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD)){
-           if(!dataReady(conn)) return;
+           if(!dataReady(conn)) return null;
 
             List<String> addedParameters = new ArrayList<>();
             String[] strArr = period.split("-");
@@ -245,9 +241,17 @@ public final class Repositories {
                 processTheParameter("city", city, preparedStatement, count, addedParameters);
 
                 ResultSet rs = preparedStatement.executeQuery();
-                printTheResultSet(rs);
+                return getReportList(rs);
             }
         }
+    }
+
+    private static List<Fuel> getReportList(ResultSet rs) throws SQLException {
+        List<Fuel> reportList = new ArrayList<>();
+        while(rs.next()){
+            reportList.add(new Fuel(rs.getString(1), rs.getDouble(2)));
+        }
+        return reportList;
     }
 
     private static int processTheParameter(String parameter, String value, PreparedStatement prstmt, int count, List<String> addedParameters) throws SQLException {
@@ -258,26 +262,12 @@ public final class Repositories {
         return count;
     }
 
-    private static void printTheResultSet(ResultSet rs) throws SQLException {
-        if(!rs.isBeforeFirst()){
-            LOGGER.info("There are no reports data for the given flags!");
-            return;
-        }
-
-        while(rs.next()){
-            String s ="Fuel type: " + rs.getString(1) + "\t" + "Average price: " + rs.getDouble(2);
-            LOGGER.info(s);
-        }
-    }
-
     private static boolean dataReady(Connection conn) throws SQLException {
         if(!databaseExists(conn)){
-            LOGGER.info("The database doesn't exist! Please download the data!");
             return false;
         }
         conn.setCatalog(DB_NAME.toLowerCase());
         if(!tableExists(conn, PETROL_STATIONS_TABLE_NAME)){
-            LOGGER.info("The database doesn't exist! Please download the data!");
             return false;
         }
         return true;
